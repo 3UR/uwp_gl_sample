@@ -1,7 +1,8 @@
 #include <Windows.h>
 
 #include "glad/glad.h"
-#include "SDL2/SDL.h"
+#include "SDL3/SDL.h"
+#include "SDL3/SDL_main.h" // for SDL_RunApp
 
 // You can locally declare a SDL_main function or call to a DLL export (mingw works nice for this) 
 int SDL_main(int argc, char* argv[])
@@ -19,11 +20,9 @@ int SDL_main(int argc, char* argv[])
     // Create window
     SDL_Window* window = SDL_CreateWindow(
         "Sample Green Screen",      // Window title (not really used)
-        SDL_WINDOWPOS_UNDEFINED,    // Window positions not used
-        SDL_WINDOWPOS_UNDEFINED,
         640,                        // Width of framebuffer
         480,                        // Height of framebuffer
-        SDL_WINDOW_OPENGL| SDL_WINDOW_FULLSCREEN_DESKTOP // Flags, need FULLSCREEN to stretch a lower res
+        SDL_WINDOW_OPENGL| SDL_WINDOW_FULLSCREEN // Flags, need FULLSCREEN to stretch a lower res
     );
 
     if (!window) {
@@ -47,7 +46,7 @@ int SDL_main(int argc, char* argv[])
     SDL_Event event;
     while (1) {
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
+            if (event.type == SDL_EVENT_QUIT) {
                 break;
             }
         }
@@ -61,13 +60,16 @@ int SDL_main(int argc, char* argv[])
     }
 
     // Cleanup
-    SDL_GL_DeleteContext(glContext);
+    SDL_GL_DestroyContext(glContext);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
     return 0;
 
 }
+
+// https://github.com/3UR/SDL3-uwp/blob/fcc25bd3727e8e98c1445fbd6a97dcd6c5e0f15a/docs/README-migration.md?plain=1#L1143C1-L1144C1
+#define SDL_WinRTRunApp(MAIN_FUNC, RESERVED)  SDL_RunApp(0, NULL, MAIN_FUNC, RESERVED)
 
 // Entry point into app (Note, SDL doesn't like being init from here you must call SDL_main)
 int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR argv, int argc)
